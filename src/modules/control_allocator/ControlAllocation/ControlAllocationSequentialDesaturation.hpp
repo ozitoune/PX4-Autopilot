@@ -72,10 +72,10 @@ private:
 	 *
 	 * @param actuator_sp Actuator setpoint, vector that is modified
 	 * @param desaturation_vector vector that is added to the outputs, e.g. thrust_scale
-	 * @param increase_only if true, only allow to increase (add) a fraction of desaturation_vector
+	 * @param increase_limit if value below 1, only allow to increase (add) a fraction of desaturation_vector to the specified amount
 	 */
 	void desaturateActuators(ActuatorVector &actuator_sp, const ActuatorVector &desaturation_vector,
-				 bool increase_only = false);
+				 float increase_limit = 1.f);
 
 	/**
 	 * Computes the gain k by which desaturation_vector has to be multiplied

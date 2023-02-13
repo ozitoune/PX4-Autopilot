@@ -39,7 +39,7 @@
  */
 
 #include "ControlAllocationSequentialDesaturation.hpp"
-
+#include "mathlib/mathlib.h"
 
 void
 ControlAllocationSequentialDesaturation::allocate()
@@ -66,13 +66,12 @@ ControlAllocationSequentialDesaturation::allocate()
 
 void ControlAllocationSequentialDesaturation::desaturateActuators(
 	ActuatorVector &actuator_sp,
-	const ActuatorVector &desaturation_vector, bool increase_only)
+	const ActuatorVector &desaturation_vector, float increase_limit)
 {
 	float gain = computeDesaturationGain(desaturation_vector, actuator_sp);
 
-	if (increase_only && gain < 0.f) {
-		return;
-	}
+	printf("gain: %.3f\n", (double)gain);
+	gain = math::max(gain, -increase_limit);
 
 	for (int i = 0; i < _num_actuators; i++) {
 		actuator_sp(i) += gain * desaturation_vector(i);
@@ -193,7 +192,7 @@ ControlAllocationSequentialDesaturation::mixAirmodeDisabled()
 	}
 
 	// only reduce thrust
-	desaturateActuators(_actuator_sp, thrust_z, true);
+	desaturateActuators(_actuator_sp, thrust_z, 0.f);
 
 	// Reduce roll/pitch acceleration if needed to unsaturate
 	desaturateActuators(_actuator_sp, roll);
@@ -224,7 +223,7 @@ ControlAllocationSequentialDesaturation::mixYaw()
 	_actuator_max = max_prev;
 
 	// reduce thrust only
-	desaturateActuators(_actuator_sp, thrust_z, true);
+	desaturateActuators(_actuator_sp, thrust_z, 0.f);
 }
 
 void
