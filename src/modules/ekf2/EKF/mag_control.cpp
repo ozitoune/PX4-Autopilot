@@ -289,11 +289,15 @@ void Ekf::controlMagFusion()
 
 		Vector3f mag = mag_sample.mag;
 
-		// use mag bias if variance good
-		const Vector3f mag_bias_var = getMagBiasVariance();
+		// use mag bias if variance good (unless in HEADING only configured)
+		if (_params.mag_fusion_type != MagFuseType::HEADING) {
+			const Vector3f mag_bias_var = getMagBiasVariance();
 
-		if (mag_bias_var.longerThan(0.f) && !getMagBiasVariance().longerThan(0.001f)) {
-			mag -= _state.mag_B;
+			if (mag_bias_var.longerThan(0.f) && !getMagBiasVariance().longerThan(0.001f)) {
+				if (_params.mag_fusion_type == MagFuseType::NONE) {
+					mag -= _state.mag_B;
+				}
+			}
 		}
 
 		const Vector3f mag_earth_pred = R_to_earth * mag;
